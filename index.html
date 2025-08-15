@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Application for Employment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .platform-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #4F46E5;
+            background-color: #F5F3FF;
+        }
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-indigo-600 text-white shadow-md">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-briefcase text-2xl"></i>
+                    <h1 class="text-2xl font-bold">AutoPostulación VIP</h1>
+                </div>
+                <button id="configBtn" class="p-2 rounded-full hover:bg-indigo-500 transition">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Column - Form and Upload -->
+                <div class="lg:col-span-1 space-y-8">
+                    <!-- Upload CV Section -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Subir Currículum</h2>
+                        <div id="uploadArea" class="upload-area rounded-lg p-8 text-center cursor-pointer mb-4">
+                            <i class="fas fa-cloud-upload-alt text-4xl mb-3 text-indigo-500"></i>
+                            <p class="text-gray-600">Arrastra tu CV aquí o haz clic para seleccionar</p>
+                            <input type="file" id="cvUpload" class="hidden" accept=".pdf,.doc,.docx">
+                            <p id="fileName" class="mt-2 text-sm text-gray-500"></p>
+                        </div>
+                        <button id="uploadBtn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition disabled:opacity-50" disabled>
+                            Subir Currículum
+                        </button>
+                        <div class="mt-3">
+                            <p class="text-sm text-gray-600">Formatos soportados: PDF, DOC, DOCX</p>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information Form -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Información Personal</h2>
+                        <form id="personalInfoForm">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2" for="fullName">
+                                    Nombre Completo
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" id="fullName" type="text" placeholder="Ej. Juan Pérez" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2" for="email">
+                                    Correo Electrónico
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" id="email" type="email" placeholder="ejemplo@email.com" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2" for="phone">
+                                    Teléfono
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" id="phone" type="tel" placeholder="+52 55 1234 5678">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2" for="jobTitle">
+                                    Puesto Deseado
+                                </label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" id="jobTitle" type="text" placeholder="Ej. Desarrollador Frontend">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-medium mb-2" for="keywords">
+                                    Palabras Clave (separadas por comas)
+                                </label>
+                                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" id="keywords" rows="2" placeholder="Ej. JavaScript, React, HTML, CSS"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700 transition">
+                                Guardar Información
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Daily Goal -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Meta Diaria</h2>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Postulaciones hoy:</span>
+                            <span id="submissionsCount" class="text-sm font-semibold text-indigo-600">0/50</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progressBar" class="progress-bar bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <div class="mt-4">
+                            <button id="startAutoBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
+                                Iniciar Auto-Postulación
+                            </button>
+                            <button id="pauseBtn" class="w-full bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600 transition mt-2 hidden">
+                                Pausar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Platforms and Applications -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Connected Platforms -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Plataformas Conectadas</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- LinkedIn Card -->
+                            <div class="platform-card bg-white border border-gray-200 rounded-lg p-4 flex items-center">
+                                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fab fa-linkedin-in text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">LinkedIn</h3>
+                                    <p class="text-sm text-gray-600">Conectado</p>
+                                </div>
+                            </div>
+
+                            <!-- Indeed Card -->
+                            <div class="platform-card bg-white border border-gray-200 rounded-lg p-4 flex items-center">
+                                <div class="w-10 h-10 bg-indigo-800 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-white font-bold">I</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">Indeed</h3>
+                                    <p class="text-sm text-gray-600">Conectado</p>
+                                </div>
+                            </div>
+
+                            <!-- Glassdoor Card -->
+                            <div class="platform-card bg-white border border-gray-200 rounded-lg p-4 flex items-center">
+                                <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fab fa-glassdoor text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">Glassdoor</h3>
+                                    <p class="text-sm text-gray-600">Conectado</p>
+                                </div>
+                            </div>
+
+                            <!-- OCC Mundial Card -->
+                            <div class="platform-card bg-white border border-gray-200 rounded-lg p-4 flex items-center">
+                                <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-white font-bold">OCC</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">OCC Mundial</h3>
+                                    <p class="text-sm text-gray-600">Conectado</p>
+                                </div>
+                            </div>
+
+                            <!-- Computrabajo Card -->
+                            <div class="platform-card bg-white border border-gray-200 rounded-lg p-4 flex items-center">
+                                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-white font-bold">CT</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold">Computrabajo</h3>
+                                    <p class="text-sm text-gray-600">Conectado</p>
+                                </div>
+                            </div>
+
+                            <!-- Add More Platform -->
+                            <div class="platform-card bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-center cursor-pointer hover:bg-gray-100">
+                                <i class="fas fa-plus text-gray-400 mr-2"></i>
+                                <span class="text-gray-500">Agregar plataforma</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Applications -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Postulaciones Recientes</h2>
+                            <div class="relative">
+                                <select id="platformFilter" class="appearance-none bg-gray-100 border border-gray-300 rounded-md pl-3 pr-8 py-1 text-sm">
+                                    <option value="all">Todas las plataformas</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="indeed">Indeed</option>
+                                    <option value="glassdoor">Glassdoor</option>
+                                    <option value="occ">OCC Mundial</option>
+                                    <option value="computrabajo">Computrabajo</option>
+                                </select>
+                                <i class="fas fa-chevron-down absolute right-2 top-2 text-gray-500 text-xs"></i>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Empresa
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Puesto
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Plataforma
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Fecha
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Estado
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="applicationsTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- Sample Applications - Will be populated by JavaScript -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <div class="flex items-center">
+                                                <img src="https://placehold.co/40x40" alt="Logotipo de Microsoft en estilo moderno con colores corporativos" class="w-6 h-6 rounded-full mr-2">
+                                                Microsoft
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            Frontend Developer
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                LinkedIn
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            10/06/2023
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Postulado
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <!-- More rows will be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span id="showingFrom">1</span> a <span id="showingTo">10</span> de <span id="totalApplications">26</span> postulaciones
+                            </div>
+                            <div class="flex space-x-1">
+                                <button class="px-3 py-1 bg-gray-100 rounded-md disabled:opacity-50" disabled id="prevPage">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="px-3 py-1 bg-indigo-600 text-white rounded-md" id="nextPage">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Application Statistics -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Estadísticas de Postulación</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Pie Chart Card -->
+                            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-700">Distribución por Plataforma</h3>
+                                    <select class="text-xs border border-gray-300 rounded px-2 py-1">
+                                        <option>Últimos 7 días</option>
+                                        <option>Este mes</option>
+                                        <option>Últimos 3 meses</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-center py-4">
+                                    <img src="https://placehold.co/300x200" alt="Gráfico circular mostrando distribución de postulaciones por plataforma con colores distintivos para LinkedIn, Indeed, Glassdoor, OCC Mundial y Computrabajo" class="w-full max-w-xs">
+                                </div>
+                            </div>
+
+                            <!-- Line Chart Card -->
+                            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-700">Tendencia Semanal</h3>
+                                    <select class="text-xs border border-gray-300 rounded px-2 py-1">
+                                        <option>Esta semana</option>
+                                        <option>Semana pasada</option>
+                                        <option>Últimas 4 semanas</option>
+                                    </select>
+                                </div>
+                                <div class="flex justify-center py-4">
+                                    <img src="https://placehold.co/300x200" alt="Gráfico de líneas mostrando tendencia de postulaciones a lo largo de la semana con datos diarios" class="w-full max-w-xs">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-100 border-t border-gray-200 py-6">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-gray-600 text-sm">© 2023 AutoPostulación VIP. Todos los derechos reservados.</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 hover:text-indigo-600 transition">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="text-gray-600 hover:text-indigo-600 transition">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="#" class="text-gray-600 hover:text-indigo-600 transition">
+                            <i class="fas fa-question-circle"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Upload CV functionality
+            const uploadArea = document.getElementById('uploadArea');
+            const cvUpload = document.getElementById('cvUpload');
+            const fileName = document.getElementById('fileName');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            uploadArea.addEventListener('click', () => {
+                cvUpload.click();
+            });
+
+            cvUpload.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    fileName.textContent = e.target.files[0].name;
+                    uploadBtn.disabled = false;
+                } else {
+                    fileName.textContent = '';
+                    uploadBtn.disabled = true;
+                }
+            });
+
+            uploadBtn.addEventListener('click', () => {
+                if (cvUpload.files.length > 0) {
+                    // Simulate upload
+                    setTimeout(() => {
+                        alert('Currículum subido exitosamente!');
+                        uploadBtn.textContent = 'Actualizar Currículum';
+                    }, 1000);
+                }
+            });
+
+            // Mock data for applications
+            const applications = [
+                {
+                    company: "Amazon",
+                    logo: "https://placehold.co/40x40",
+                    position: "Senior Developer",
+                    platform: "LinkedIn",
+                    date: "09/06/2023",
+                    status: "Postulado"
+                },
+                {
+                    company: "Google",
+                    logo: "https://placehold.co/40x40",
+                    position: "UX Designer",
+                    platform: "Indeed",
+                    date: "08/06/2023",
+                    status: "Visto"
+                },
+                {
+                    company: "Apple",
+                    logo: "https://placehold.co/40x40",
+                    position: "iOS Developer",
+                    platform: "Glassdoor",
+                    date: "07/06/2023",
+                    status: "Postulado"
+                },
+                {
+                    company: "Netflix",
+                    logo: "https://placehold.co/40x40",
+                    position: "Product Manager",
+                    platform: "OCC Mundial",
+                    date: "06/06/2023",
+                    status: "No visto"
+                },
+                {
+                    company: "Facebook",
+                    logo: "https://placehold.co/40x40",
+                    position: "Data Scientist",
+                    platform: "Computrabajo",
+                    date: "05/06/2023",
+                    status: "Postulado"
+                },
+                {
+                    company: "Tesla",
+                    logo: "https://placehold.co/40x40",
+                    position: "Embedded Engineer",
+                    platform: "LinkedIn",
+                    date: "04/06/2023",
+                    status: "Visto"
+                },
+                {
+                    company: "Microsoft",
+                    logo: "https://placehold.co/40x40",
+                    position: "Backend Developer",
+                    platform: "Indeed",
+                    date: "03/06/2023",
+                    status: "No visto"
+                },
+                {
+                    company: "Twitter",
+                    logo: "https://placehold.co/40x40",
+                    position: "Frontend Developer",
+                    platform: "Glassdoor",
+                    date: "02/06/2023",
+                    status: "Postulado"
+                },
+                {
+                    company: "Uber",
+                    logo: "https://placehold.co/40x40",
+                    position: "Product Designer",
+                    platform: "OCC Mundial",
+                    date: "01/06/2023",
+                    status: "Visto"
+                },
+                {
+                    company: "Airbnb",
+                    logo: "https://placehold.co/40x40",
+                    position: "Fullstack Developer",
+                    platform: "Computrabajo",
+                    date: "31/05/2023",
+                    status: "Postulado"
+                }
+            ];
+
+            // Function to create platform badge
+            function getPlatformBadge(platform) {
+                const platforms = {
+                    "LinkedIn": { bg: "bg-blue-100", text: "text-blue-800" },
+                    "Indeed": { bg: "bg-indigo-100", text: "text-indigo-800" },
+                    "Glassdoor": { bg: "bg-green-100", text: "text-green-800" },
+                    "OCC Mundial": { bg: "bg-red-100", text: "text-red-800" },
+                    "Computrabajo": { bg: "bg-orange-100", text: "text-orange-800" }
+                };
+                return platforms[platform] || { bg: "bg-gray-100", text: "text-gray-800" };
+            }
+
+            // Function to create status badge
+            function getStatusBadge(status) {
+                const statuses = {
+                    "Postulado": { bg: "bg-green-100", text: "text-green-800" },
+                    "Visto": { bg: "bg-blue-100", text: "text-blue-800" },
+                    "No visto": { bg: "bg-gray-100", text: "text-gray-800" }
+                };
+                return statuses[status] || { bg: "bg-gray-100", text: "text-gray-800" };
+            }
+
+            // Function to render applications table
+            function renderApplications(data) {
+                const tableBody = document.getElementById('applicationsTable');
+                tableBody.innerHTML = '';
+
+                data.forEach(app => {
+                    const platformBadge = getPlatformBadge(app.platform);
+                    const statusBadge = getStatusBadge(app.status);
+
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <div class="flex items-center">
+                                <img src="${app.logo}" alt="Logotipo de ${app.company} en estilo corporativo" class="w-6 h-6 rounded-full mr-2">
+                                ${app.company}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${app.position}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${platformBadge.bg} ${platformBadge.text}">
+                                ${app.platform}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${app.date}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusBadge.bg} ${statusBadge.text}">
+                                ${app.status}
+                            </span>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // Update showing counts
+                document.getElementById('showingFrom').textContent = 1;
+                document.getElementById('showingTo').textContent = data.length;
+                document.getElementById('totalApplications').textContent = applications.length;
+            }
+
+            // Initial render
+            renderApplications(applications);
+
+            // Platform filter
+            document.getElementById('platformFilter').addEventListener('change', function(e) {
+                const platform = e.target.value;
+                if (platform === 'all') {
+                    renderApplications(applications);
+                } else {
+                    const filtered = applications.filter(app => app.platform.toLowerCase().includes(platform));
+                    renderApplications(filtered);
+                }
+            });
+
+            // Auto-submission functionality
+            const startAutoBtn = document.getElementById('startAutoBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const progressBar = document.getElementById('progressBar');
+            const submissionsCount = document.getElementById('submissionsCount');
+
+            let submissionInterval;
+            let count = 0;
+
+            startAutoBtn.addEventListener('click', function() {
+                this.disabled = true;
+                this.classList.add('hidden');
+                pauseBtn.classList.remove('hidden');
+
+                submissionInterval = setInterval(() => {
+                    count++;
+                    const percentage = Math.min((count / 50) * 100, 100);
+                    progressBar.style.width = `${percentage}%`;
+                    submissionsCount.textContent = `${count}/50`;
+
+                    // Add a new random application to the table
+                    if (count <= 50 && Math.random() > 0.3) {
+                        const platforms = ["LinkedIn", "Indeed", "Glassdoor", "OCC Mundial", "Computrabajo"];
+                        const statuses = ["Postulado", "Visto", "No visto"];
+                        const companies = ["IBM", "Oracle", "SAP", "Salesforce", "Adobe", "Spotify", "Pinterest", "Slack", "Zoom", "Dropbox"];
+                        const positions = [
+                            "Software Engineer", "DevOps Engineer", "QA Tester", 
+                            "Scrum Master", "Product Owner", "System Administrator",
+                            "Database Admin", "Security Analyst", "Mobile Developer"
+                        ];
+
+                        const newApp = {
+                            company: companies[Math.floor(Math.random() * companies.length)],
+                            logo: "https://placehold.co/40x40",
+                            position: positions[Math.floor(Math.random() * positions.length)],
+                            platform: platforms[Math.floor(Math.random() * platforms.length)],
+                            date: new Date().toLocaleDateString('es-MX'),
+                            status: statuses[Math.floor(Math.random() * statuses.length)]
+                        };
+
+                        applications.unshift(newApp);
+                        
+                        // Filter by current platform if needed
+                        const currentPlatform = document.getElementById('platformFilter').value;
+                        if (currentPlatform === 'all' || newApp.platform.toLowerCase().includes(currentPlatform)) {
+                            renderApplications(
+                                currentPlatform === 'all' ? 
+                                applications : 
+                                applications.filter(app => app.platform.toLowerCase().includes(currentPlatform))
+                            );
+                        }
+                    }
+
+                    if (count >= 50) {
+                        clearInterval(submissionInterval);
+                        pauseBtn.classList.add('hidden');
+                        startAutoBtn.classList.remove('hidden');
+                        startAutoBtn.textContent = "Meta alcanzada hoy";
+                        startAutoBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        startAutoBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                        startAutoBtn.disabled = true;
+                    }
+                }, 1000);
+            });
+
+            pauseBtn.addEventListener('click', function() {
+                clearInterval(submissionInterval);
+                this.classList.add('hidden');
+                startAutoBtn.classList.remove('hidden');
+                startAutoBtn.disabled = false;
+            });
+
+            // Form submission
+            document.getElementById('personalInfoForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Información personal guardada correctamente!');
+            });
+        });
+    </script>
+</body>
+</html>
